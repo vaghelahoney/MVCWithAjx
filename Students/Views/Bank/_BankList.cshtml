@@ -1,0 +1,32 @@
+@model IEnumerable<Students.Models.Bank>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Bank Name</th>
+            <th>IFSC Code</th>
+            <th>Status</th>
+            <th>Details Count</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.IFSCCode</td>
+                <td>@(item.IsActive ? "Active" : "Inactive")</td>
+                <td>@item.BankDetails.Count</td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-warning" onclick="editBank(@item.Id)">
+                        Edit
+                    </button>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteBank(@item.Id)">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

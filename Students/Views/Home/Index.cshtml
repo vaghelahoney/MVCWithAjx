@@ -1,0 +1,313 @@
+@model Student;
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+<select id="myDropdown" class="form-control">
+    <option value="">Select Option</option>
+    <option value="hide">List  Student</option>
+    <option value="show">  Add Student</option>
+</select>
+
+<div id="targetDiv" style="display:none; margin-top:20px;">
+    <div class="row">
+        <div class="col-md-9">
+            <form id="studentForm">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="Id" class="control-label"></label>
+                    <input asp-for="Id" class="form-control" />
+                    <span asp-validation-for="Id" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="FirstName" class="control-label"></label>
+                    <input asp-for="FirstName" class="form-control" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="LastName" class="control-label"></label>
+                    <input asp-for="LastName" class="form-control" type="text" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="CountryId">Country</label>
+                    <select asp-for="CountryId" asp-items="ViewBag.Countries" onchange="OnselectState(this)" class="form-control">
+                        <option value="">-- Select Country --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="StateId">State</label>
+                    <select asp-for="StateId" id="StateId" class="form-control" onchange="OnselectCity(this)">
+                        <option value="">-- Select State --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="CityId">City   </label>
+                    <select asp-for="CityId" asp-items="ViewBag.Cities" class="form-control">
+                        <option value="">-- Select City --</option>
+                    </select>
+                </div>
+
+ 
+                <div class="form-group">
+                    <label asp-for="Email" class="control-label"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="StudentDetails.Address" class="control-label"></label>
+                    <input asp-for="StudentDetails.Address" id="Address" class="form-control" />
+                    <span asp-validation-for="StudentDetails.Address" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="StudentDetails.AadharNumber" class="control-label"></label>
+                    <input asp-for="StudentDetails.AadharNumber" id="AadharNumber" class="form-control" />
+                    <span asp-validation-for="StudentDetails.AadharNumber" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="StudentDetails.MobileNumber" class="control-label"></label>
+                    <input asp-for="StudentDetails.MobileNumber" id="MobileNumber" class="form-control" />
+                    <span asp-validation-for="StudentDetails.MobileNumber" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="IsActive" class="control-label"></label>
+                    <input asp-for="IsActive" type="checkbox" class="form-check-input" />
+                    <span asp-validation-for="IsActive" class="text-danger"></span>
+                </div>
+                      
+                <div class="form-group">
+                    <input type="button" onclick="save()" id="btnCallApi" value="Student Details" class="btn btn-primary" />
+                </div>
+                <b>@ViewBag.message</b>
+            </form>
+        </div>
+    </div>
+  
+</div>
+
+
+<div id="targetDivstudent" style="display:none; margin-top:20px;">
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+
+                function OnselectCity(stateElement){
+                    var stateId = stateElement.value;
+                    
+                    if(stateId == "") {
+                        $('#CityId').empty().append('<option value="">-- Select City --</option>');
+                        return;
+                    }
+
+                    $.ajax({
+                        url: '/Home/GetCitiesAsyncByStateID/',
+                        type: 'GET',
+                        data: { stateId: stateId },
+                        success: function(result) {
+                            $('#CityId').empty();
+                            $('#CityId').append('<option value="">-- Select City --</option>');
+                        
+                            $.each(result, function(index, item) {
+                                $('#CityId').append('<option value="' + item.cityId + '">' + item.cityName + '</option>');
+                            });
+                        },
+                        error: function(error) {
+                            console.log("Error:", error);
+                        }
+                    });
+                }
+
+                function OnselectState(CountryId){
+                        debugger;
+        var countryId = CountryId.value;
+    
+        if(countryId == "") {
+            $('#StateId').empty().append('<option value="">-- Select State --</option>');
+            $('#CityId').empty().append('<option value="">-- Select City --</option>');
+            return;
+        }
+
+        // Also clear city dropdown immediately when country starts loading
+        $('#CityId').empty().append('<option value="">-- Select City --</option>');
+
+        $.ajax({
+            url: '/Home/GetStatesAsyncByCountryID/',
+            type: 'GET',
+            data: { countryId: countryId },
+            success: function(result) {
+                debugger;
+                console.log(result);
+            
+                $('#StateId').empty();
+                $('#StateId').append('<option value="">-- Select State --</option>');
+            
+                $.each(result, function(index, item) {
+                    $('#StateId').append('<option value="' + item.state_Id + '">' + item.state_Name + '</option>');
+                });
+            },
+            error: function(error) {
+                console.log("Error:", error);
+            }
+        });
+
+                }
+
+                function onloadsuction(){
+                $.ajax({
+                                   type: "GET",
+                                   url: "/Home/GetStudentList",
+                                   dataType: "html",
+                                   success: function (response) {
+                                   $('#targetDivstudent').html(response);
+                           },
+                           error: function (xhr, status, error) {
+                               alert("An error occurred: " + xhr.responseText);
+                           }
+                       });
+                }
+
+                function onclear()
+                {
+                            $('#Id').val("0")
+                            $('#FirstName').val("");
+                            $('#LastName').val("");
+                            $('#Email').val("");
+                            $('#IsActive').prop('checked', false);
+                            $('#CountryId').val("");
+                            $('#StateId').val("");
+                            $('#CityId').val("");
+                            $('#Address').val("");
+                            $('#AadharNumber').val("");
+                            $('#MobileNumber').val("");
+                }
+
+                $(document).ready(function () {
+                    $('#myDropdown').on('change', function () {
+                        var selectedValue = $(this).val();
+                        if (selectedValue === 'show') {
+                            $('#targetDiv').show();
+                            $('#targetDivstudent').hide();
+
+                        } else {
+                            onclear();
+                            $('#targetDiv').hide();
+                            $('#targetDivstudent').show();
+                            onloadsuction();
+                        }
+                    });
+                });
+
+                 function save(){
+
+                     if (!$('#studentForm').valid()) {
+                        return;
+                    }
+                    
+                               var Id = $('#Id').val();
+                               var firstName = $('#FirstName').val();
+                               var lastName = $('#LastName').val();
+                               var email = $('#Email').val();
+                               var isActive = $('#IsActive').is(':checked');
+                               var countryId = $('#CountryId').val();
+                               var stateId = $('#StateId').val();
+                               var cityId = $('#CityId').val();
+                               var address = $('#Address').val();
+                               var aadharNumber = $('#AadharNumber').val();
+                               var mobileNumber = $('#MobileNumber').val();
+                
+                               $.ajax({
+                                   type: "POST",
+                                   url: "/Home/Create",
+                                   data: {
+                                       Id: Id,
+                                       FirstName: firstName,
+                                       LastName: lastName,
+                                       Email: email,
+                                       IsActive: isActive,
+                                       CountryId: countryId,
+                                       StateId: stateId,
+                                       CityId: cityId,
+                                       StudentDetails: {
+                                           Address: address,
+                                           AadharNumber: aadharNumber,
+                                           MobileNumber: mobileNumber
+                                       }
+                               },
+                                   success: function (response) {
+                                       alert("Success: " + response.message);
+                                       onclear();
+                                   },
+                                   error: function () {
+                                       alert("Error calling API");
+                                   }
+                               });
+                               }
+
+                function deleteStudent(id) {
+                    debugger
+                    if (confirm("Are you sure you want to delete this student?")) {
+                        $.ajax({
+                            type: "DELETE",
+                            url: "/Home/Delete/" + id,
+                            success: function (response) {
+                                alert("Student deleted successfully!");
+                            },
+                            error: function () {
+                                alert("Error deleting student.");
+                            }
+                        });
+                    }
+                }
+
+                function editStudent(id) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/Home/GetById/" + id,
+                        success: function (student) {
+                            $('#Id').val(student.id);
+                            $('#FirstName').val(student.firstName);
+                            $('#LastName').val(student.lastName);
+                            $('#Email').val(student.email);
+                            $('#IsActive').prop('checked', student.isActive);
+                            $('#CountryId').val(student.countryId);
+                            
+                            // Load states based on country, then set state and city (Note: real implementation requires async handling)
+                            $('#StateId').append('<option value="' + student.stateId + '">' + student.stateId + '</option>');
+                            $('#StateId').val(student.stateId);
+                            $('#CityId').val(student.cityId);
+
+                            if (student.studentDetails) {
+                                $('#Address').val(student.studentDetails.address);
+                                $('#AadharNumber').val(student.studentDetails.aadharNumber);
+                                $('#MobileNumber').val(student.studentDetails.mobileNumber);
+                            } else {
+                                $('#Address').val('');
+                                $('#AadharNumber').val('');
+                                $('#MobileNumber').val('');
+                            }
+
+                            $('#myDropdown').val('show').trigger('change');
+                        },
+                        error: function () {
+                            alert("Error fetching student details.");
+                        }
+                    });
+                }
+    </script>
+}
